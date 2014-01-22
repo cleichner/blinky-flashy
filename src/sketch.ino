@@ -1,33 +1,28 @@
 #include "Display.h"
 
-uint16_t scale = 0;
+uint16_t intensity = 0;
 
 void setup() {
     Display.init();
 }
 
-
-uint16_t wait = 0;
-
 void loop()
 {
-    Display.initialize_image();
-    Display.brighten(scale);
+    static bool offset = false;
+    static uint16_t wait = 0;
 
-    if (wait < 200) {
-        Display.alternate(scale);
-    }
-
+    Display.clear();
+    Display.line(4, VERTICAL, intensity);
+    Display.line(4, HORIZONTAL, intensity);
+    //Display.checkerboard(intensity, offset);
     Display.show();
 
-    wait++;
-    if (wait > 400) {
+    if (++wait >= 400) {
+        offset = !offset;
         wait = 0;
     }
 
-    scale++;
-    if (scale > 4000) {
-        scale = 0;
+    if (++intensity >= 4095) {
+        intensity = 0;
     }
-//    delay(33);
 }

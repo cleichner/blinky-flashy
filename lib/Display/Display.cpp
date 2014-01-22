@@ -3,25 +3,51 @@
 #include "Display.h"
 #include "Tlc5940.h"
 
-void Display_::init() {
+void DisplayCls::init() {
     /* Call Tlc.init() to setup the tlcs.
        You can optionally pass an initial PWM value (0 - 4095) for all
        channels.*/
     Tlc.init();
 }
 
-void Display_::initialize_image() {
-    int init = 0;
+void DisplayCls::line(uint8_t index, orientation_t orientation,
+                      uint16_t intensity) {
+    uint8_t limit = NUM_ROWS;
+    if (orientation == HORIZONTAL) {
+       limit = NUM_COLS;
+    }
+    for (uint8_t i = 0; i < limit; ++i) {
+        if (orientation == VERTICAL) {
+            image[i][index] = intensity;
+        } else {
+            image[index][i] = intensity;
+        }
+    }
+}
+
+void DisplayCls::clear() {
     for (uint8_t i = 0; i < NUM_ROWS; ++i) {
         for (uint8_t j = 0; j < NUM_COLS; ++j) {
-            image[i][j] = init & 0b1;
+            image[i][j] = 0;
+        }
+    }
+}
+
+void DisplayCls::checkerboard(uint16_t intensity, bool offset) {
+    uint8_t init = 0;
+    if (offset) {
+        init = 1;
+    }
+    for (uint8_t i = 0; i < NUM_ROWS; ++i) {
+        for (uint8_t j = 0; j < NUM_COLS; ++j) {
+            image[i][j] = intensity * (init & 0b1);
             init++;
         }
         init++;
     }
 }
 
-void Display_::show() {
+void DisplayCls::show() {
     /* I didn't solder the rows in the right order this straightens them out.
      * This can also be generated with a(n) = n + (-1)^n.
      */
@@ -38,21 +64,13 @@ void Display_::show() {
     Tlc.update();
 }
 
-void Display_::brighten(uint16_t scale) {
+void DisplayCls::alternate(uint16_t intensity) {
     for (uint8_t i = 0; i < NUM_ROWS; ++i) {
         for (uint8_t j = 0; j < NUM_COLS; ++j) {
-            image[i][j] *= scale;
+            image[i][j] = intensity - image[i][j];
         }
     }
 }
 
-void Display_::alternate(uint16_t scale) {
-    for (uint8_t i = 0; i < NUM_ROWS; ++i) {
-        for (uint8_t j = 0; j < NUM_COLS; ++j) {
-            image[i][j] = scale - image[i][j];
-        }
-    }
-}
-
-Display_ Display;
+DisplayCls Display;
 
