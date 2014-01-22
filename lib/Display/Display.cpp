@@ -1,7 +1,12 @@
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "Display.h"
 #include "Tlc5940.h"
+
+uint8_t min(uint8_t a, uint8_t b) {
+    return !(b<a)?a:b;
+}
 
 void DisplayCls::init() {
     /* Call Tlc.init() to setup the tlcs.
@@ -12,15 +17,26 @@ void DisplayCls::init() {
 
 void DisplayCls::line(uint8_t index, orientation_t orientation,
                       uint16_t intensity) {
-    uint8_t limit = NUM_ROWS;
-    if (orientation == HORIZONTAL) {
-       limit = NUM_COLS;
-    }
-    for (uint8_t i = 0; i < limit; ++i) {
-        if (orientation == VERTICAL) {
+    if (orientation == VERTICAL) {
+        for (uint8_t i = 0; i < NUM_ROWS; ++i) {
             image[i][index] = intensity;
-        } else {
+        }
+    } else {
+        for (uint8_t i = 0; i < NUM_COLS; ++i) {
             image[index][i] = intensity;
+        }
+    }
+}
+
+void DisplayCls::line(uint8_t row, uint8_t col, uint8_t length,
+                      orientation_t orientation, uint16_t intensity) {
+    if (orientation == VERTICAL){
+        for (uint8_t i = row; i <= min(NUM_ROWS, row + length-1); ++i) {
+            image[i][col] = intensity;
+        }
+    } else {
+        for (uint8_t i = col; i <= min(NUM_COLS, col + length-1); ++i) {
+            image[row][i] = intensity;
         }
     }
 }

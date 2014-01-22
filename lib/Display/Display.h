@@ -16,6 +16,8 @@ class DisplayCls {
     void checkerboard(uint16_t intensity, bool offset);
     void alternate(uint16_t intensity);
     void line(uint8_t index, orientation_t orientation,  uint16_t intensity);
+    void line(uint8_t row, uint8_t col, uint8_t length,
+              orientation_t orientation, uint16_t intensity);
   private:
     uint16_t image[NUM_ROWS][NUM_COLS];
 };
