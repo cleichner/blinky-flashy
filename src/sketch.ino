@@ -13,7 +13,9 @@ void loop()
 
     Display.clear();
     Display.line(4, VERTICAL, intensity);
+    Display.line(3, VERTICAL, intensity);
     Display.line(4, HORIZONTAL, intensity);
+    Display.line(5, HORIZONTAL, intensity);
     //Display.checkerboard(intensity, offset);
     Display.show();
 
