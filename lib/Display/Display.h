@@ -4,9 +4,14 @@
 #define NUM_COLS 8
 
 class Display_ {
-  public :
+  public:
     void init();
-    void show(uint16_t image[NUM_ROWS][NUM_COLS]);
+    void show();
+    void initialize_image();
+    void brighten(uint16_t scale);
+    void alternate(uint16_t scale);
+  private:
+    uint16_t image[NUM_ROWS][NUM_COLS];
 };
 
 extern Display_ Display;
