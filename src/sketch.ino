@@ -96,26 +96,31 @@ void setup() {
 
 void loop()
 {
-//    Serial.print(".");
-    Serial.print("forward ");
-    Serial.print(Car.goingForward());
-    Serial.print(" backward ");
-    Serial.print(Car.goingBackward());
-    Serial.print(" left ");
-    Serial.print(Car.goingLeft());
-    Serial.print(" right ");
-    Serial.println(Car.goingRight());
-    delay(250);
+    uint8_t centerX = 4;
+    uint8_t centerY = 4;
 
-//    Display.clear();
- //   if (digitalRead(going_forward)) {
- //       Display.line(8, 0, 8, HORIZONTAL, 500);
- //   }
+    Display.clear();
+    if (Car.goingForward()) {
+        centerY += 1;
+    }
 
-//    Display.line(1 + vertical_length, 0, 2, VERTICAL, intensity/7);
-//    Display.line(0, horizontal_length, 2, HORIZONTAL, intensity/7);
-//    Display.line(1, 0, vertical_length, VERTICAL, intensity);
-//    Display.line(0, 0, horizontal_length, HORIZONTAL, intensity);
+    if (Car.goingBackward()) {
+        centerY -= 1;
+    }
+
+    if (Car.goingLeft()) {
+        centerX -= 1;
+    }
+
+    if (Car.goingRight()) {
+        centerX += 1;
+    }
+
+    Display.line(centerY, 0, 8, HORIZONTAL, intensity);
+    Display.line(0, centerX, 12, VERTICAL, intensity);
+
+    Display.show();
 
     t.update();
+    delay(33);
 }
