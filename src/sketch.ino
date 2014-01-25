@@ -45,13 +45,63 @@ bool CarCls::goingRight() {
 CarCls Car;
 Timer t;
 
+bool moving = false;
 
 uint16_t intensity = 0;
+bool up = true;
+void pulse() {
+    if (!moving) {
+        if (up) {
+            intensity += 1;
+            if (intensity >= 3750) {
+                up = false;
+            }
+            if (intensity > 500) {
+                intensity += 5;
+            }
+            if (intensity > 1000) {
+                intensity += 5;
+            }
+            if (intensity > 2000) {
+                intensity += 5;
+            }
+        } else {
+            intensity -= 1;
+            if (intensity <= 20) {
+                up = true;
+            }
+            if (intensity > 500) {
+                intensity -= 5;
+            }
+            if (intensity > 1000) {
+                intensity -= 5;
+            }
+            if (intensity > 2000) {
+                intensity -= 5;
+            }
+        }
+    } else {
+        if (intensity <= 3750) {
+            intensity += 1;
+            if (intensity > 500) {
+                intensity += 5;
+            }
+            if (intensity > 1000) {
+                intensity += 5;
+            }
+            if (intensity > 2000) {
+                intensity += 5;
+            }
+        }
+    }
+}
 
-void brighten() {
-//    Serial.println(intensity);
-    if (++intensity >= 4095) {
-        intensity = 0;
+uint16_t movingTime = 0;
+void updateMovingTime() {
+    if (moving && movingTime < 3750) {
+        movingTime += 25;
+    } else if (movingTime > 0) {
+        movingTime -= 25;
     }
 }
 
@@ -60,46 +110,45 @@ uint8_t centerY = 6;
 
 void updateY() {
     if (Car.goingForward() && centerY < 11) {
+        moving = true;
         centerY++;
     } else if (!Car.goingForward() && centerY > 6) {
+        moving = false;
         centerY--;
     }
 
     if (Car.goingBackward() && centerY > 1) {
+        moving = true;
         centerY--;
     } else if (!Car.goingBackward() && centerY < 6) {
+        moving = false;
         centerY++;
     }
 }
 
 void updateX() {
-    if (Car.goingLeft() && centerX < 6) {
+    if (Car.goingLeft() && centerX < 7) {
+        moving = true;
         centerX++;
     } else if (!Car.goingLeft() && centerX > 4) {
+        moving = false;
         centerX--;
     }
-
     if (Car.goingRight() && centerX > 1) {
+        moving = true;
         centerX--;
     } else if (!Car.goingRight() && centerX < 4) {
+        moving = false;
         centerX++;
     }
 }
 
-void setup() {
-    Serial.begin(9600);
-    Display.init();
-    Car.init();
-
-//    t.every(1000, update_state);
-    t.every(30, brighten);
-    t.every(100, updateY);
-    t.every(120, updateX);
-}
-
-void loop()
-{
+void display() {
     Display.clear();
+
+    for (int i = 0; i < 12; i++) {
+        Display.line(i, 0, 8, HORIZONTAL, movingTime);
+    }
 
     Display.line(centerY, 0, 8, HORIZONTAL, intensity);
     Display.line(centerY-1, 0, 8, HORIZONTAL, intensity);
@@ -108,7 +157,22 @@ void loop()
     Display.line(0, centerX-1, 12, VERTICAL, intensity);
 
     Display.show();
+}
 
+
+void setup() {
+    Serial.begin(9600);
+    Display.init();
+    Car.init();
+
+    t.every(3, display);
+    t.every(3, pulse);
+    t.every(100, updateY);
+    t.every(120, updateX);
+    t.every(200, updateMovingTime);
+}
+
+void loop()
+{
     t.update();
-    delay(33);
 }
