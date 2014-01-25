@@ -4,6 +4,46 @@
 #define UPDATE_PERIOD 2000
 // every, every (with repeat), after,
 
+const int forwardInput = 5;
+const int backwardInput = 6;
+const int leftInput = 7;
+const int rightInput = 8;
+
+class CarCls {
+    public:
+        void init();
+        bool goingForward();
+        bool goingBackward();
+        bool goingLeft();
+        bool goingRight();
+};
+
+void CarCls::init() {
+    pinMode(forwardInput, INPUT);      // sets the digital pin as output
+    pinMode(backwardInput, INPUT);      // sets the digital pin as output
+    pinMode(leftInput, INPUT);      // sets the digital pin as output
+    pinMode(rightInput, INPUT);      // sets the digital pin as output
+
+}
+
+bool CarCls::goingForward() {
+    return !digitalRead(forwardInput);
+}
+
+bool CarCls::goingBackward() {
+    return !digitalRead(backwardInput);
+}
+
+bool CarCls::goingLeft() {
+    return !digitalRead(leftInput);
+}
+
+bool CarCls::goingRight() {
+    return !digitalRead(rightInput);
+}
+
+CarCls Car;
+
 uint16_t intensity = 0;
 
 bool vertical_up = true;
@@ -44,38 +84,12 @@ void brighten() {
     Display.show();
 }
 
-int forwardInput = 5;
-int backwardInput = 6;
-int leftInput = 7;
-int rightInput = 8;
-
-bool goingForward() {
-    return !digitalRead(forwardInput);
-}
-
-bool goingBackward() {
-    return !digitalRead(backwardInput);
-}
-
-bool goingLeft() {
-    return !digitalRead(leftInput);
-}
-
-bool goingRight() {
-    return !digitalRead(rightInput);
-}
-
 void setup() {
     Serial.begin(9600);
     Display.init();
-    pinMode(forwardInput, INPUT);      // sets the digital pin as output
-    pinMode(backwardInput, INPUT);      // sets the digital pin as output
-    pinMode(leftInput, INPUT);      // sets the digital pin as output
-    pinMode(rightInput, INPUT);      // sets the digital pin as output
+    Car.init();
 
     intensity = 2000;
-
-
 //    t.every(1000, update_state);
 //    t.every(50, brighten);
 }
@@ -84,13 +98,13 @@ void loop()
 {
 //    Serial.print(".");
     Serial.print("forward ");
-    Serial.print(goingForward());
+    Serial.print(Car.goingForward());
     Serial.print(" backward ");
-    Serial.print(goingBackward());
+    Serial.print(Car.goingBackward());
     Serial.print(" left ");
-    Serial.print(goingLeft());
+    Serial.print(Car.goingLeft());
     Serial.print(" right ");
-    Serial.println(goingRight());
+    Serial.println(Car.goingRight());
     delay(250);
 
 //    Display.clear();
