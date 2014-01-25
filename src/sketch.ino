@@ -43,45 +43,47 @@ bool CarCls::goingRight() {
 }
 
 CarCls Car;
+Timer t;
+
 
 uint16_t intensity = 0;
 
-bool vertical_up = true;
-uint8_t vertical_length = 0;
-
-bool horizontal_up = true;
-uint8_t horizontal_length = 1;
-
-Timer t;
-
-void update_state() {
-    Serial.println("STATE");
-    horizontal_length++;
-    if (horizontal_length & 0x1) {
-        vertical_length++;
-    }
-
-    if (horizontal_length > NUM_COLS) {
-        horizontal_length = 1;
-    }
-
-    if (vertical_length > NUM_ROWS) {
-        vertical_length = 0;
-    }
-
-    if (horizontal_length == 1 && vertical_length == 0) {
+void brighten() {
+//    Serial.println(intensity);
+    if (++intensity >= 4095) {
         intensity = 0;
     }
 }
 
-void brighten() {
-    Serial.print("*");
-    if (intensity < 4095) {
-        intensity++;
-    } else {
-        intensity = 0;
+uint8_t centerX = 4;
+uint8_t centerY = 6;
+
+void updateY() {
+    if (Car.goingForward() && centerY < 11) {
+        centerY++;
+    } else if (!Car.goingForward() && centerY > 6) {
+        centerY--;
     }
-    Display.show();
+
+    if (Car.goingBackward() && centerY > 1) {
+        centerY--;
+    } else if (!Car.goingBackward() && centerY < 6) {
+        centerY++;
+    }
+}
+
+void updateX() {
+    if (Car.goingLeft() && centerX < 6) {
+        centerX++;
+    } else if (!Car.goingLeft() && centerX > 4) {
+        centerX--;
+    }
+
+    if (Car.goingRight() && centerX > 1) {
+        centerX--;
+    } else if (!Car.goingRight() && centerX < 4) {
+        centerX++;
+    }
 }
 
 void setup() {
@@ -89,35 +91,21 @@ void setup() {
     Display.init();
     Car.init();
 
-    intensity = 2000;
 //    t.every(1000, update_state);
-//    t.every(50, brighten);
+    t.every(30, brighten);
+    t.every(100, updateY);
+    t.every(120, updateX);
 }
 
 void loop()
 {
-    uint8_t centerX = 4;
-    uint8_t centerY = 4;
-
     Display.clear();
-    if (Car.goingForward()) {
-        centerY += 1;
-    }
-
-    if (Car.goingBackward()) {
-        centerY -= 1;
-    }
-
-    if (Car.goingLeft()) {
-        centerX -= 1;
-    }
-
-    if (Car.goingRight()) {
-        centerX += 1;
-    }
 
     Display.line(centerY, 0, 8, HORIZONTAL, intensity);
+    Display.line(centerY-1, 0, 8, HORIZONTAL, intensity);
+
     Display.line(0, centerX, 12, VERTICAL, intensity);
+    Display.line(0, centerX-1, 12, VERTICAL, intensity);
 
     Display.show();
 
