@@ -96,31 +96,33 @@ void pulse() {
     }
 }
 
+#if 0
 uint16_t movingTime = 0;
 void updateMovingTime() {
-    if (moving && movingTime < 3750) {
+    if (!moving && movingTime < 3750) {
         movingTime += 25;
     } else if (movingTime > 0) {
         movingTime -= 25;
     }
 }
+#endif
 
-uint8_t centerX = 4;
-uint8_t centerY = 6;
+int8_t centerX = 0;
+int8_t centerY = 0;
 
 void updateY() {
-    if (Car.goingForward() && centerY < 11) {
+    if (Car.goingForward() && centerY < 12) {
         moving = true;
         centerY++;
-    } else if (!Car.goingForward() && centerY > 6) {
+    } else if (!Car.goingForward() && centerY > 0) {
         moving = false;
         centerY--;
     }
 
-    if (Car.goingBackward() && centerY > 1) {
+    if (Car.goingBackward() && centerY > -12) {
         moving = true;
         centerY--;
-    } else if (!Car.goingBackward() && centerY < 6) {
+    } else if (!Car.goingBackward() && centerY < 0) {
         moving = false;
         centerY++;
     }
@@ -130,14 +132,14 @@ void updateX() {
     if (Car.goingLeft() && centerX < 7) {
         moving = true;
         centerX++;
-    } else if (!Car.goingLeft() && centerX > 4) {
+    } else if (!Car.goingLeft() && centerX > 0) {
         moving = false;
         centerX--;
     }
-    if (Car.goingRight() && centerX > 1) {
+    if (Car.goingRight() && centerX > -8) {
         moving = true;
         centerX--;
-    } else if (!Car.goingRight() && centerX < 4) {
+    } else if (!Car.goingRight() && centerX < 0) {
         moving = false;
         centerX++;
     }
@@ -146,19 +148,46 @@ void updateX() {
 void display() {
     Display.clear();
 
-    for (int i = 0; i < 12; i++) {
-        Display.line(i, 0, 8, HORIZONTAL, movingTime);
+    for (int8_t i = 0; i < centerY; i++) {
+        if (i >= 0) {
+            Display.line(i, 0, 8, HORIZONTAL, intensity/2);
+        }
+    }
+    for (int8_t i = 11; i > 11 + centerY; i--) {
+        if (i >= 0) {
+            Display.line(i, 0, 8, HORIZONTAL, intensity/2);
+        }
     }
 
-    Display.line(centerY, 0, 8, HORIZONTAL, intensity);
-    Display.line(centerY-1, 0, 8, HORIZONTAL, intensity);
+    for (int8_t i = 1; i < centerX; i++) {
+        if (i != 0 && i != 7) {
+            Display.line(0, i, 12, VERTICAL, intensity/2);
+        }
+    }
+    for (int8_t i = 7; i > 7 + centerX; i--) {
+        if (i != 0 && i != 7) {
+            Display.line(0, i, 12, VERTICAL, intensity/2);
+        }
+    }
 
-    Display.line(0, centerX, 12, VERTICAL, intensity);
-    Display.line(0, centerX-1, 12, VERTICAL, intensity);
+    Display.line(0, 0, 12, VERTICAL, intensity/2);
+    Display.line(0, 7, 12, VERTICAL, intensity/2);
 
     Display.show();
 }
 
+void log() {
+    Serial.print(centerX);
+    Serial.print(" ");
+    Serial.print(centerY);
+    Serial.print(" ");
+    Serial.print(intensity);
+    Serial.print(" ");
+    Serial.print(up);
+    Serial.print(" ");
+    Serial.println(moving);
+
+}
 
 void setup() {
     Serial.begin(9600);
@@ -166,13 +195,15 @@ void setup() {
     Car.init();
 
     t.every(3, display);
-    t.every(3, pulse);
+    t.every(10, pulse);
+    //t.every(10, log);
     t.every(100, updateY);
     t.every(120, updateX);
-    t.every(200, updateMovingTime);
+    //t.every(200, updateMovingTime);
+    Serial.println("restart");
 }
 
-void loop()
-{
+void loop() {
     t.update();
 }
+

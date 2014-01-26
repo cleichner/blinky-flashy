@@ -32,11 +32,11 @@ void DisplayCls::line(uint8_t row, uint8_t col, uint8_t length,
                       orientation_t orientation, uint16_t intensity) {
     if (orientation == VERTICAL){
         for (uint8_t i = row; i <= min(NUM_ROWS, row + length-1); ++i) {
-            image[i][col] = intensity;
+            image[i][col] += intensity;
         }
     } else {
         for (uint8_t i = col; i <= min(NUM_COLS, col + length-1); ++i) {
-            image[row][i] = intensity;
+            image[row][i] += intensity;
         }
     }
 }
