@@ -1,5 +1,3 @@
-#define CHANNELS_PER_TLC 16
-
 #define NUM_ROWS 12
 #define NUM_COLS 8
 
