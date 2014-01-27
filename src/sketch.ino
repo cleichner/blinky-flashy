@@ -96,16 +96,6 @@ void pulse() {
     }
 }
 
-#if 0
-uint16_t movingTime = 0;
-void updateMovingTime() {
-    if (!moving && movingTime < 3750) {
-        movingTime += 25;
-    } else if (movingTime > 0) {
-        movingTime -= 25;
-    }
-}
-#endif
 
 int8_t centerX = 0;
 int8_t centerY = 0;
