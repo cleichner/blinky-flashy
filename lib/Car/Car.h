@@ -5,6 +5,7 @@ class CarCls {
         bool goingBackward();
         bool goingLeft();
         bool goingRight();
+        bool moving();
 };
 
 extern CarCls Car;

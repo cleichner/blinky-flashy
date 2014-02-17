@@ -31,4 +31,8 @@ bool CarCls::goingRight() {
     return !(PINB & (1 << rightInput));
 }
 
+bool CarCls::moving() {
+    return goingForward() || goingBackward() || goingLeft() || goingRight();
+}
+
 CarCls Car;

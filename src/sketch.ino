@@ -21,66 +21,48 @@
 #include "Tetris.h"
 #include "Timer.h"
 
-#define UPDATE_PERIOD 2000
-#define MAX_INTENSITY 3750
-#define MIN_INTENSITY 20
+#define MAX_VELOCITY 10
 
 #define BAUD_RATE 115200
 
+
 Timer t;
 
-bool moving = false;
 uint16_t intensity = 0;
 bool up = true;
 
-int8_t centerX = 0;
-int8_t centerY = 0;
+bool moving = false;
+int8_t xVelocity = 0;
+int8_t yVelocity = 0;
 
 void updateY() {
-    if (Car.goingForward() && centerY < NUM_ROWS) {
-        moving = true;
-        centerY++;
-    } else if (!Car.goingForward() && centerY > 0) {
-        moving = false;
-        centerY--;
+    moving = Car.moving();
+
+    if (Car.goingForward() && yVelocity < MAX_VELOCITY) {
+        yVelocity++;
+    } else if (!Car.goingForward() && yVelocity > 0) {
+        yVelocity--;
     }
 
-    if (Car.goingBackward() && centerY > -NUM_ROWS) {
-        moving = true;
-        centerY--;
-    } else if (!Car.goingBackward() && centerY < 0) {
-        moving = false;
-        centerY++;
+    if (Car.goingBackward() && yVelocity > -MAX_VELOCITY) {
+        yVelocity--;
+    } else if (!Car.goingBackward() && yVelocity < 0) {
+        yVelocity++;
     }
 }
 
 void updateX() {
-    if (Car.goingLeft() && centerX < NUM_COLS - 1) {
-        moving = true;
-        centerX++;
-    } else if (!Car.goingLeft() && centerX > 0) {
-        moving = false;
-        centerX--;
+    moving = Car.moving();
+    if (Car.goingLeft() && xVelocity < MAX_VELOCITY) {
+        xVelocity++;
+    } else if (!Car.goingLeft() && xVelocity > 0) {
+        xVelocity--;
     }
-    if (Car.goingRight() && centerX > -NUM_COLS) {
-        moving = true;
-        centerX--;
-    } else if (!Car.goingRight() && centerX < 0) {
-        moving = false;
-        centerX++;
+    if (Car.goingRight() && xVelocity > -MAX_VELOCITY) {
+        xVelocity--;
+    } else if (!Car.goingRight() && xVelocity < 0) {
+        xVelocity++;
     }
-}
-
-int8_t r = 0;
-void rotate() {
-    r++;
-    r %=  4;
-}
-
-int8_t r2 = 0;
-void rotate2() {
-    r2++;
-    r2 %= 4;
 }
 
 uint8_t brightness = 25;
@@ -88,16 +70,48 @@ Point sPoints[] = {Point(-1, 1), Point(0, 1), Point(0, 0), Point(1, 0)};
 TetrisPiece S(sPoints, THREE_GRID, brightness);
 
 Point iPoints[] = {Point(-1, 0), Point(0, 0), Point(1, 0), Point(2, 0)};
-TetrisPiece I(iPoints, FOUR_GRID, brightness);
+TetrisPiece I(iPoints, FOUR_GRID, brightness*3);
+
+Point insertionPoint(3, 10);
+Point center = insertionPoint;
+
+TetrisEnvironment env;
+
+bool canRotate = true;
+int8_t r = 0;
+void rotate() {
+    if (canRotate) {
+        r++;
+        r %=  4;
+    }
+}
+
+void update() {
+    if (center.y > 2) {
+        center.y -= 1;
+    } else {
+        center = insertionPoint;
+    }
+}
 
 void display() {
     Display.clear();
 
-    Point center(4,4);
-    S.show(&Display, center, r);
+    TetrisPiece* P = &S;
+    //S.show(&Display, center, r);
+    P->show(&Display, center, r);
+    env.show(&Display);
+    if (P->inside(center, r) && P->inside(Point(center.x, center.y - 1), r)) {
+        center.y--;
+    } else {
+        canRotate = false;
+    }
 
-    Point other(4,8);
-    I.show(&Display, other, 3-r2);
+    if (P->inside(center, r) && P->inside(Point(center.x - 1, center.y), r)) {
+        center.x--;
+    } else {
+        canRotate = false;
+    }
 
     Display.show();
 }
@@ -107,12 +121,14 @@ void setup() {
     Display.init();
     Car.init();
 
-    t.every(20, display);
-    t.every(500, rotate);
-    t.every(509, rotate2);
+    I.addToEnvironment(&env, insertionPoint, 2);
 
+    t.every(100, display);
+    t.every(200, rotate);
+
+    //t.every(600, update);
     t.every(100, updateY);
-    t.every(120, updateX);
+    t.every(100, updateX);
     Serial.println("restart");
 }
 

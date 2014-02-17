@@ -21,6 +21,15 @@ class Point {
     }
 };
 
+class TetrisEnvironment {
+    uint16_t env[NUM_COLS][NUM_ROWS];
+    public:
+        void show (DisplayCls* d);
+        void addPoint(Point p, uint16_t brightness) {
+            env[p.x][p.y] = brightness;
+        }
+};
+
 class TetrisPiece {
   private:
     Point piece[SQUARES_IN_PIECE];
@@ -34,11 +43,8 @@ class TetrisPiece {
         }
     }
     void show(DisplayCls* d, const Point& center, int8_t rotation);
+    bool inside(const Point& center, int8_t rotation);
+    void addToEnvironment(TetrisEnvironment* env, const Point& center, int8_t rotation);
 };
-
-Point rotate(Point p, int8_t size, int8_t n);
-
-void showPiece(Point piece[SQUARES_IN_PIECE], int8_t size, DisplayCls* d,
-               const Point& center, int8_t rotation, uint16_t brightness);
 
 #endif // TETRIS_H
