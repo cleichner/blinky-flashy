@@ -1,5 +1,8 @@
 #define NUM_ROWS 12
 #define NUM_COLS 8
+#include "Tlc5940.h"
+
+#include <stdint.h>
 
 class DisplayCls {
   public:
