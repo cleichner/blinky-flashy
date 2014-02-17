@@ -32,54 +32,6 @@ bool moving = false;
 uint16_t intensity = 0;
 bool up = true;
 
-void pulse() {
-    if (!moving) {
-        if (up) {
-            intensity += 1;
-            if (intensity >= MAX_INTENSITY) {
-                up = false;
-            }
-            if (intensity > MAX_INTENSITY/7) {
-                intensity += 5;
-            }
-            if (intensity > MAX_INTENSITY/3) {
-                intensity += 5;
-            }
-            if (intensity > MAX_INTENSITY/2) {
-                intensity += 5;
-            }
-        } else {
-            intensity -= 1;
-            if (intensity <= MIN_INTENSITY) {
-                up = true;
-            }
-            if (intensity > MAX_INTENSITY/7) {
-                intensity -= 5;
-            }
-            if (intensity > MAX_INTENSITY/3) {
-                intensity -= 5;
-            }
-            if (intensity > MAX_INTENSITY/2) {
-                intensity -= 5;
-            }
-        }
-    } else {
-        if (intensity <= MAX_INTENSITY) {
-            intensity += 1;
-            if (intensity > MAX_INTENSITY/7) {
-                intensity += 5;
-            }
-            if (intensity > MAX_INTENSITY/3) {
-                intensity += 5;
-            }
-            if (intensity > MAX_INTENSITY/2) {
-                intensity += 5;
-            }
-        }
-    }
-}
-
-
 int8_t centerX = 0;
 int8_t centerY = 0;
 
@@ -118,48 +70,51 @@ void updateX() {
     }
 }
 
+int8_t r = 0;
+void rotate() {
+    r++;
+    r = r % 4;
+}
+
+struct Point {
+    int8_t x;
+    int8_t y;
+    Point(int8_t x, int8_t y) : x(x), y(y) { }
+    Point operator +(const Point& p) {
+        return Point(x + p.x, y + p.y);
+    }
+    Point rotate(int8_t n) {
+        if (n == 0) {
+            return *this;
+        } else {
+            return Point(-y, x).rotate(n - 1);
+        }
+    }
+};
+
+#define SQUARES_IN_PIECE 4
+
 void display() {
     Display.clear();
 
-    for (int8_t i = 0; i < centerY; i++) {
-        if (i >= 0) {
-            Display.line(i, 0, NUM_COLS, HORIZONTAL, intensity/2);
-        }
-    }
-    for (int8_t i = (NUM_ROWS - 1); i > (NUM_ROWS - 1) + centerY; i--) {
-        if (i >= 0) {
-            Display.line(i, 0, NUM_COLS, HORIZONTAL, intensity/2);
-        }
+    uint8_t brightness = 3000;
+
+    Point points[SQUARES_IN_PIECE] = {
+        Point(-1, 1), Point(0, 1), Point(0, 0), Point(1, 0)
+    };
+    Point center(4,4);
+    for (int8_t i = 0; i < SQUARES_IN_PIECE; i++) {
+        Point p = center + points[i].rotate(r);
+        Display.point(p.x, p.y, 3000);
     }
 
-    for (int8_t i = 1; i < centerX; i++) {
-        if (i != 0 && i != (NUM_COLS - 1)) {
-            Display.line(0, i, NUM_ROWS, VERTICAL, intensity/2);
-        }
+    Point other(4,8);
+    for (int8_t i = 0; i < SQUARES_IN_PIECE; i++) {
+        Point p = other + points[i].rotate(3 - r);
+        Display.point(p.x, p.y, 3000);
     }
-    for (int8_t i = (NUM_COLS - 1); i > (NUM_COLS - 1) + centerX; i--) {
-        if (i != 0 && i != (NUM_COLS - 1)) {
-            Display.line(0, i, NUM_ROWS, VERTICAL, intensity/2);
-        }
-    }
-
-    Display.line(0, 0, NUM_ROWS, VERTICAL, intensity/2);
-    Display.line(0, (NUM_COLS - 1), NUM_ROWS, VERTICAL, intensity/2);
 
     Display.show();
-}
-
-void log() {
-    Serial.print(centerX);
-    Serial.print(" ");
-    Serial.print(centerY);
-    Serial.print(" ");
-    Serial.print(intensity);
-    Serial.print(" ");
-    Serial.print(up);
-    Serial.print(" ");
-    Serial.println(moving);
-
 }
 
 void setup() {
@@ -167,8 +122,8 @@ void setup() {
     Display.init();
     Car.init();
 
-    t.every(3, display);
-    t.every(10, pulse);
+    t.every(20, display);
+    t.every(500, rotate);
     // Uncomment to log all state variables
     // t.every(10, log);
     t.every(100, updateY);
