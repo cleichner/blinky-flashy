@@ -97,7 +97,7 @@ struct Point {
 void display() {
     Display.clear();
 
-    uint8_t brightness = 3000;
+    uint8_t brightness = 200;
 
     Point points[SQUARES_IN_PIECE] = {
         Point(-1, 1), Point(0, 1), Point(0, 0), Point(1, 0)
@@ -105,13 +105,13 @@ void display() {
     Point center(4,4);
     for (int8_t i = 0; i < SQUARES_IN_PIECE; i++) {
         Point p = center + points[i].rotate(r);
-        Display.point(p.x, p.y, 3000);
+        Display.point(p.x, p.y, brightness);
     }
 
     Point other(4,8);
     for (int8_t i = 0; i < SQUARES_IN_PIECE; i++) {
         Point p = other + points[i].rotate(3 - r);
-        Display.point(p.x, p.y, 3000);
+        Display.point(p.x, p.y, brightness);
     }
 
     Display.show();
