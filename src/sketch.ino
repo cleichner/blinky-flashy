@@ -21,7 +21,7 @@
 #include "Tetris.h"
 #include "Timer.h"
 
-#define MAX_VELOCITY 10
+#define MAX_VELOCITY 1
 
 #define BAUD_RATE 115200
 
@@ -98,20 +98,25 @@ void display() {
     Display.clear();
 
     TetrisPiece* P = &S;
-    //S.show(&Display, center, r);
+
     P->show(&Display, center, r);
     env.show(&Display);
-    if (P->inside(center, r) && P->inside(Point(center.x, center.y - 1), r)) {
+
+    if (yVelocity < 0 && P->canMoveDown(Point(center.x, center.y - 1), r)) {
         center.y--;
-    } else {
-        canRotate = false;
     }
 
+    if (!P->canMoveDown(Point(center.x, center.y - 1), r)) {
+        P->addToEnvironment(&env, center, r);
+        center = insertionPoint;
+    }
+/*
     if (P->inside(center, r) && P->inside(Point(center.x - 1, center.y), r)) {
         center.x--;
     } else {
         canRotate = false;
     }
+    */
 
     Display.show();
 }
@@ -121,14 +126,14 @@ void setup() {
     Display.init();
     Car.init();
 
-    I.addToEnvironment(&env, insertionPoint, 2);
+//    I.addToEnvironment(&env, insertionPoint, 2);
 
     t.every(100, display);
-    t.every(200, rotate);
+//    t.every(200, rotate);
 
     //t.every(600, update);
-    t.every(100, updateY);
-    t.every(100, updateX);
+    t.every(10, updateY);
+    t.every(10, updateX);
     Serial.println("restart");
 }
 

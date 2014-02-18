@@ -29,7 +29,7 @@ void TetrisPiece::show(DisplayCls* d, const Point& center, int8_t rotation) {
 }
 
 // should replace with can rotate and can move to separately
-bool TetrisPiece::inside(const Point& center, int8_t rotation) {
+bool TetrisPiece::canMoveDown(const Point& center, int8_t rotation) {
     for (int8_t i = 0; i < SQUARES_IN_PIECE; i++) {
         Point p = center + rotate(piece[i], grid, rotation);
         if (p.x < 0 || p.y < 0) {

@@ -36,14 +36,15 @@ class TetrisPiece {
     RotationGrid grid;
     uint16_t brightness;
   public:
-    TetrisPiece(Point piece[SQUARES_IN_PIECE], RotationGrid grid, uint16_t brightness) :
+    TetrisPiece(Point piece[SQUARES_IN_PIECE], RotationGrid grid,
+                uint16_t brightness) :
         grid(grid), brightness(brightness) {
         for (int8_t i = 0; i < SQUARES_IN_PIECE; i++) {
             this->piece[i] = piece[i];
         }
     }
     void show(DisplayCls* d, const Point& center, int8_t rotation);
-    bool inside(const Point& center, int8_t rotation);
+    bool canMoveDown(const Point& center, int8_t rotation);
     void addToEnvironment(TetrisEnvironment* env, const Point& center, int8_t rotation);
 };
 
