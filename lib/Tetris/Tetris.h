@@ -28,6 +28,7 @@ class TetrisEnvironment {
         void addPoint(Point p, uint16_t brightness) {
             env[p.x][p.y] = brightness;
         }
+        bool pointIsOccupied(const Point& p) const;
 };
 
 class TetrisPiece {
@@ -44,7 +45,7 @@ class TetrisPiece {
         }
     }
     void show(DisplayCls* d, const Point& center, int8_t rotation);
-    bool canMoveDown(const Point& center, int8_t rotation);
+    bool canMoveDown(const TetrisEnvironment& env,  const Point& center, int8_t rotation);
     void addToEnvironment(TetrisEnvironment* env, const Point& center, int8_t rotation);
 };
 

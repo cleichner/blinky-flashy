@@ -25,19 +25,38 @@
 
 #define BAUD_RATE 115200
 
-
 Timer t;
 
 uint16_t intensity = 0;
 bool up = true;
 
 bool moving = false;
+int8_t rotation = 0;
 int8_t xVelocity = 0;
 int8_t yVelocity = 0;
 
-void updateY() {
+int8_t velocityIndex = 0;
+int8_t velocityLength = 16;
+int8_t yVelocityVals[] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+};
+int8_t xVelocityVals[] = {
+     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+};
+
+void updateVelocity() {
     moving = Car.moving();
 
+    if (velocityIndex < velocityLength) {
+        xVelocity = xVelocityVals[velocityIndex];
+        yVelocity = yVelocityVals[velocityIndex];
+        velocityIndex++;
+    } else {
+        xVelocity = 0;
+        yVelocity = 0;
+    }
+
+#if 0
     if (Car.goingForward() && yVelocity < MAX_VELOCITY) {
         yVelocity++;
     } else if (!Car.goingForward() && yVelocity > 0) {
@@ -49,9 +68,7 @@ void updateY() {
     } else if (!Car.goingBackward() && yVelocity < 0) {
         yVelocity++;
     }
-}
 
-void updateX() {
     moving = Car.moving();
     if (Car.goingLeft() && xVelocity < MAX_VELOCITY) {
         xVelocity++;
@@ -63,6 +80,7 @@ void updateX() {
     } else if (!Car.goingRight() && xVelocity < 0) {
         xVelocity++;
     }
+#endif
 }
 
 uint8_t brightness = 25;
@@ -77,64 +95,35 @@ Point center = insertionPoint;
 
 TetrisEnvironment env;
 
-bool canRotate = true;
-int8_t r = 0;
-void rotate() {
-    if (canRotate) {
-        r++;
-        r %=  4;
-    }
-}
-
-void update() {
-    if (center.y > 2) {
-        center.y -= 1;
-    } else {
-        center = insertionPoint;
-    }
-}
-
 void display() {
     Display.clear();
 
     TetrisPiece* P = &S;
 
-    P->show(&Display, center, r);
+    P->show(&Display, center, rotation);
     env.show(&Display);
 
-    if (yVelocity < 0 && P->canMoveDown(Point(center.x, center.y - 1), r)) {
+    if (yVelocity < 0 && P->canMoveDown(env, Point(center.x, center.y - 1), rotation)) {
         center.y--;
     }
 
-    if (!P->canMoveDown(Point(center.x, center.y - 1), r)) {
-        P->addToEnvironment(&env, center, r);
+    if (!P->canMoveDown(env, Point(center.x, center.y - 1), rotation)) {
+        P->addToEnvironment(&env, center, rotation);
         center = insertionPoint;
     }
-/*
-    if (P->inside(center, r) && P->inside(Point(center.x - 1, center.y), r)) {
-        center.x--;
-    } else {
-        canRotate = false;
-    }
-    */
 
     Display.show();
 }
 
 void setup() {
     Serial.begin(BAUD_RATE);
+    Serial.println("restart");
+
     Display.init();
     Car.init();
 
-//    I.addToEnvironment(&env, insertionPoint, 2);
-
+    t.every(101, updateVelocity);
     t.every(100, display);
-//    t.every(200, rotate);
-
-    //t.every(600, update);
-    t.every(10, updateY);
-    t.every(10, updateX);
-    Serial.println("restart");
 }
 
 void loop() {
