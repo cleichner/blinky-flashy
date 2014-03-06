@@ -41,7 +41,7 @@ int8_t yVelocityVals[] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 };
 int8_t xVelocityVals[] = {
-     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  -1,  0,  0,  0,  0,
 };
 
 void updateVelocity() {
@@ -105,6 +105,12 @@ void display() {
 
     if (yVelocity < 0 && P->canMoveDown(env, Point(center.x, center.y - 1), rotation)) {
         center.y--;
+    }
+
+    if (xVelocity < 0) {
+        center.x--;
+    } else if (xVelocity > 0) {
+        center.x++;
     }
 
     if (!P->canMoveDown(env, Point(center.x, center.y - 1), rotation)) {
